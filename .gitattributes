@@ -1,0 +1,11 @@
+# Prioritize Python as the main language
+*.py linguist-detectable=true
+
+# Deprioritize HTML and CSS (but still detectable)
+*.html linguist-detectable=true
+*.css linguist-detectable=true
+
+# Exclude non-source files like images or assets
+*.png linguist-detectable=false
+*.jpg linguist-detectable=false
+*.svg linguist-detectable=false
