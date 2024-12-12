@@ -96,5 +96,3 @@ http://127.0.0.1:5000
 ## License
 This project is licensed under the [MIT License](LICENSE).
 ```
-
-You can copy and paste this directly into your README file. Let me know if you need further adjustments!
