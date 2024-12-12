@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sort Algorithm Visualizer</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            color: #343a40;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 120vh;
+            margin: 0;
+        }
+
+        h1 {
+            color: #007bff;
+            text-align: center;
+        }
+
+        form {
+            background-color: #ffffff;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 600px;
+        }
+
+        label {
+            font-weight: bold;
+            margin-top: 15px;
+            display: block;
+            color: #495057;
+        }
+
+        input[type="text"],
+        input[type="file"] {
+            width: 100%;
+            padding: 12px;
+            margin-top: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus,
+        input[type="file"]:focus {
+            border-color: #007bff;
+            outline: none;
+        }
+
+        input[type="radio"] {
+            margin-right: 10px;
+        }
+
+        input[type="submit"] {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+            width: 100%;
+            padding: 14px 0;
+            margin-top: 20px;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+
+        input[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+
+        .algorithm-options {
+            display: flex;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .algorithm-options label {
+            width: 50%;
+            margin-bottom: 10px;
+        }
+
+        p {
+            color: red;
+            text-align: center;
+        }
+
+        /* Loader styling */
+        #loader {
+            position: fixed;
+            left: 50%;
+            top: 50%;
+            width: 50px;
+            height: 50px;
+            margin-left: -25px;
+            margin-top: -25px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #007bff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            display: none;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .custom-label {
+            color: #495057;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .section-title {
+            color: #343a40;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .optional {
+            font-size: 0.9em;
+            color: #6c757d;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+
+<body onload="toggleOptions();">
+    <div id="loader"></div>
+
+    <form method="post" enctype="multipart/form-data" onsubmit="showLoader()">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div class="alert alert-danger" role="alert">
+            {% for category, message in messages %}
+            <p>{{ message }}</p>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
+        <h1>Sort Algorithm Visualizer</h1>
+
+        <div class="section-title">Choose an Option:</div>
+        <label>
+            <input type="radio" name="execution_type" value="array" onclick="toggleOptions()" checked> Execution Time Based on Array
+        </label>
+        <label>
+            <input type="radio" name="execution_type" value="comparison" onclick="toggleOptions()"> Execution Time Comparison for Different Sizes
+        </label>
+
+        <div id="array_options" class="hidden">
+            <label for="array">Input Array (comma-separated):</label>
+            <input type="text" id="array" name="array" placeholder="e.g., 3,1,4,1,5,9">
+
+            <label for="array_size" class="optional">(Optional) Array Size for Random Generation:</label>
+            <input type="text" id="array_size" name="array_size" placeholder="e.g., 10">
+
+            <label for="file" class="optional">(Optional) Upload a File:</label>
+            <input type="file" id="file" name="file">
+        </div>
+
+        <div id="comparison_option" class="hidden">
+            <label for="input_array_sizes" class="optional">Multiple Array Sizes (comma-separated):</label>
+            <input type="text" id="input_array_sizes" name="input_array_sizes" placeholder="e.g., 10,20,30">
+        </div>
+
+        <div class="section-title">Select Sorting Algorithms:</div>
+        <div class="algorithm-options">
+            <label><input type="checkbox" name="algorithms" value="merge_sort" checked> Merge Sort</label>
+            <label><input type="checkbox" name="algorithms" value="insertion_sort" checked> Insertion Sort</label>
+            <label><input type="checkbox" name="algorithms" value="selection_sort" checked> Selection Sort</label>
+            <label><input type="checkbox" name="algorithms" value="bubble_sort"> Bubble Sort</label>
+        </div>
+
+        <label for="iterations" class="optional">Total Iterations per Algorithm (default = 1):</label>
+        <input type="text" id="iterations" name="iterations" placeholder="e.g., 5">
+
+        <input type="submit" value="Visualize">
+    </form>
+
+</body>
+<script>
+    function resetForm() {
+        const form = document.querySelector('form');
+        form.reset();
+
+        // Manually clear file input fields
+        const fileInputs = form.querySelectorAll('input[type="file"]');
+        fileInputs.forEach(fileInput => {
+            fileInput.value = '';
+        });
+
+        // Manually clear text input fields
+        const textInputs = form.querySelectorAll('input[type="text"]');
+        textInputs.forEach(textInput => {
+            textInput.value = '';
+        });
+
+        // Manually clear radio buttons
+        const radioButtons = form.querySelectorAll('input[type="radio"]');
+        radioButtons.forEach(radioButton => {
+            radioButton.checked = false;
+        });
+
+        // Set the default radio button to checked
+        const defaultRadioButton = document.querySelector('input[name="execution_type"][value="array"]');
+        defaultRadioButton.checked = true;
+    }
+
+    function toggleOptions() {
+        const arrayOptions = document.getElementById('array_options');
+        const comparisonOption = document.getElementById('comparison_option');
+        const execTimeArray = document.querySelector('input[name="execution_type"][value="array"]').checked;
+        const execTimeComparison = document.querySelector('input[name="execution_type"][value="comparison"]').checked;
+
+        arrayOptions.style.display = execTimeArray ? 'block' : 'none';
+        comparisonOption.style.display = execTimeComparison ? 'block' : 'none';
+    }
+
+    function showLoader() {
+        document.getElementById('loader').style.display = 'block';
+    }
+    // Event listener to clear the form data on page unload
+    window.addEventListener('unload', () => {
+        const form = document.querySelector('form');
+        form.reset();
+    
+    });
+</script>
+
+</html>
